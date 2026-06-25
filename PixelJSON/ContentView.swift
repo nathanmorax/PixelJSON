@@ -29,7 +29,7 @@ struct ContentView: View {
 
             footerView
         }
-        .frame(width: 420) // ← más ancho
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color(red: 0.11, green: 0.11, blue: 0.13))
         .onReceive(NotificationCenter.default.publisher(for: .jsonPasted)) { notification in
             if let raw = notification.userInfo?["raw"] as? String {
@@ -109,8 +109,7 @@ struct ContentView: View {
     private var footerView: some View {
         HStack {
             Button {
-//                .buttonStyle(.plain)
-//                .foregroundStyle(Color.accentLavender)
+
             } label: {
                 Image(systemName: "gearshape")
             }
@@ -124,10 +123,6 @@ struct ContentView: View {
                 Image(systemName: "door.left.hand.open")
             }
 
-//            Button("Quit") {
-//            }
-//            .buttonStyle(.plain)
-//            .foregroundStyle(.white.opacity(0.6))
         }
         .font(.system(size: 12, weight: .medium))
         .padding(.horizontal, 18)
@@ -141,7 +136,10 @@ struct JSONResultView: View {
 
     @State private var didCopy = false
     @State private var viewMode: JSONViewMode = .raw
-    @State private var parsedValue: JSONValue?
+
+    private var parsedValue: JSONValue? {
+        JSONParser.parse(json)
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -177,6 +175,7 @@ struct JSONResultView: View {
                 } else {
                     if let parsedValue {
                         JSONTreeView(value: parsedValue)
+                            .id(json) // reconstruye el grafo (y resetea pan/zoom/colapsos) con cada JSON nuevo
                     } else {
                         Text("No se pudo construir el árbol")
                             .font(.system(size: 12))
@@ -208,9 +207,6 @@ struct JSONResultView: View {
             .padding(.horizontal, 18)
             .padding(.bottom, 16)
         }
-        .onAppear {
-            parsedValue = JSONParser.parse(json)
-        }
     }
 }
 
@@ -222,17 +218,10 @@ extension Color {
     ContentView()
 }
 
-
 struct JSONTreeView: View {
     let value: JSONValue
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 3) {
-                JSONTreeNode(key: nil, value: value, depth: 0)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(14)
-        }
+        JSONGraphView(root: value)
     }
 }

@@ -8,18 +8,16 @@
 import SwiftUI
 import AppKit
 
+
 @main
 struct PixelJSONApp: App {
+    
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
 
-
     var body: some Scene {
-        MenuBarExtra {
+        WindowGroup {
             ContentView()
-        } label: {
-            Image(systemName: "tree")
         }
-        .menuBarExtraStyle(.window)
     }
 }
 
